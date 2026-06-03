@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PassType — Password Strength Checker</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f5f0e8;
+  --paper2: #ede8dc;
+  --paper3: #e8e0d0;
+  --ink: #2a1f14;
+  --ink2: #5c4a35;
+  --ink3: #8a7060;
+  --key-top: #c8b89a;
+  --key-side: #9e8870;
+  --key-shadow: #6e5840;
+  --machine-body: #7a6248;
+  --machine-dark: #4a3828;
+  --machine-light: #a08060;
+  --red-ribbon: #c0392b;
+  --green-ribbon: #1a7a4a;
+  --border: rgba(42,31,20,0.15);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #d4c9b8;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(180,160,130,0.4) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(160,140,110,0.3) 0%, transparent 50%);
+  min-height: 100vh;
+  font-family: 'Courier Prime', monospace;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem 3rem;
+  color: var(--ink);
+}
+
+/* TITLE */
+.title-area {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.main-title {
+  font-family: 'Special Elite', cursive;
+  font-size: 2.6rem;
+  color: var(--ink);
+  letter-spacing: 3px;
+  margin-bottom: 0.3rem;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+}
+.main-sub {
+  font-size: 0.82rem;
+  color: var(--ink3);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* TYPEWRITER MACHINE */
+.machine {
+  background: linear-gradient(160deg, var(--machine-light), var(--machine-body) 40%, var(--machine-dark));
+  border-radius: 20px 20px 12px 12px;
+  padding: 1.5rem 2rem 1.8rem;
+  width: 100%;
+  max-width: 720px;
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.35),
+    0 8px 20px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.15),
+    inset 0 -2px 0 rgba(0,0,0,0.2);
+  position: relative;
+}
+
+/* PAPER ROLLER */
+.roller-area {
+  background: var(--machine-dark);
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  box-shadow: inset 0 3px 8px rgba(0,0,0,0.4);
+}
+.roller-knob {
+  width: 22px; height: 22px;
+  background: radial-gradient(circle at 35% 35%, #888, #444);
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+.roller-bar {
+  flex: 1;
+  height: 14px;
+  background: linear-gradient(180deg, #555, #333);
+  border-radius: 4px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.paper-strip {
+  position: absolute;
+  width: 85%;
+  height: 10px;
+  background: var(--paper);
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* PAPER */
+.paper-wrap {
+  background: var(--paper);
+  border-radius: 3px;
+  padding: 1.2rem 1.5rem 1.5rem;
+  margin-bottom: 1.2rem;
+  box-shadow:
+    0 4px 12px rgba(0,0,0,0.2),
+    inset 0 0 40px rgba(0,0,0,0.04);
+  position: relative;
+  min-height: 160px;
+  background-image:
+    repeating-linear-gradient(
+      transparent,
+      transparent 27px,
+      rgba(42,31,20,0.08) 27px,
+      rgba(42,31,20,0.08) 28px
+    );
+  background-position: 0 32px;
+}
+.paper-wrap::before {
+  content: '';
+  position: absolute;
+  left: 2.8rem;
+  top: 0; bottom: 0;
+  width: 1px;
+  background: rgba(192,57,43,0.25);
+}
+.paper-header {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.7rem;
+  color: var(--ink3);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 0.8rem;
+  padding-left: 2rem;
+}
+.typed-line {
+  font-family: 'Special Elite', cursive;
+  font-size: 1.3rem;
+  color: var(--ink);
+  letter-spacing: 4px;
+  min-height: 2rem;
+  padding-left: 2rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1px;
+  word-break: break-all;
+  line-height: 1.8;
+}
+.typed-char {
+  display: inline-block;
+  animation: stamp 0.08s ease-out;
+  position: relative;
+}
+@keyframes stamp {
+  0%   { transform: scaleY(1.3) translateY(-3px); opacity: 0.6; }
+  60%  { transform: scaleY(0.95) translateY(1px); }
+  100% { transform: scaleY(1) translateY(0); opacity: 1; }
+}
+.typed-char.masked { color: transparent; text-shadow: 0 0 8px var(--ink); }
+.cursor-blink {
+  display: inline-block;
+  width: 2px;
+  height: 1.2rem;
+  background: var(--ink);
+  margin-left: 2px;
+  animation: cur 0.8s step-end infinite;
+  vertical-align: middle;
+}
+@keyframes cur { 50% { opacity: 0; } }
+
+.paper-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.8rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed rgba(42,31,20,0.15);
+  padding-left: 2rem;
+}
+.char-count {
+  font-size: 0.72rem;
+  color: var(--ink3);
+  letter-spacing: 1px;
+}
+.toggle-vis {
+  font-size: 0.72rem;
+  color: var(--ink2);
+  background: none;
+  border: 1px dashed var(--ink3);
+  border-radius: 3px;
+  padding: 0.2rem 0.6rem;
+  cursor: pointer;
+  font-family: 'Courier Prime', monospace;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+}
+.toggle-vis:hover { background: var(--paper2); color: var(--ink); }
+
+/* HIDDEN REAL INPUT */
+.real-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 1px; height: 1px;
+}
+
+/* STRENGTH METER ON PAPER */
+.strength-area {
+  margin-top: 1rem;
+  padding-left: 2rem;
+  display: none;
+}
+.strength-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.4rem;
+}
+.strength-lbl { font-size: 0.72rem; color: var(--ink3); letter-spacing: 1px; min-width: 70px; }
+.strength-dots {
+  display: flex;
+  gap: 4px;
+}
+.dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink3);
+  transition: background 0.3s, border-color 0.3s;
+}
+.dot.filled-weak   { background: #c0392b; border-color: #c0392b; }
+.dot.filled-mid    { background: #d4820a; border-color: #d4820a; }
+.dot.filled-good   { background: #1a7a4a; border-color: #1a7a4a; }
+.dot.filled-strong { background: #1a7a4a; border-color: #1a7a4a; }
+.strength-word {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+}
+
+/* CHECKS ON PAPER */
+.checks-paper {
+  margin-top: 0.6rem;
+  padding-left: 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.2rem 1rem;
+}
+.chk {
+  font-size: 0.72rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ink3);
+  transition: color 0.2s;
+}
+.chk.pass { color: var(--ink2); }
+.chk-sym { font-size: 0.8rem; }
+.chk.pass .chk-sym { color: var(--green-ribbon); }
+.chk.fail .chk-sym { color: rgba(42,31,20,0.25); }
+
+/* KEYBOARD */
+.keyboard {
+  background: var(--machine-dark);
+  border-radius: 10px;
+  padding: 0.8rem 0.6rem 1rem;
+  box-shadow: inset 0 4px 10px rgba(0,0,0,0.4);
+}
+.key-row {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-bottom: 5px;
+}
+.key {
+  background: linear-gradient(180deg, #d4c4a8 0%, var(--key-top) 40%, #b8a888 100%);
+  border-radius: 5px 5px 4px 4px;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Special Elite', cursive;
+  font-size: 0.72rem;
+  color: var(--ink);
+  cursor: pointer;
+  position: relative;
+  box-shadow:
+    0 4px 0 var(--key-shadow),
+    0 5px 2px rgba(0,0,0,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.4);
+  transition: transform 0.06s, box-shadow 0.06s;
+  user-select: none;
+  letter-spacing: 0;
+  border: 1px solid rgba(0,0,0,0.15);
+}
+.key:hover { background: linear-gradient(180deg, #ddd0b4, #caba9a 40%, #bfaa88); }
+.key.pressed {
+  transform: translateY(3px);
+  box-shadow:
+    0 1px 0 var(--key-shadow),
+    0 2px 1px rgba(0,0,0,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.2);
+}
+.key.wide { width: 56px; font-size: 0.62rem; }
+.key.wider { width: 80px; font-size: 0.62rem; }
+.key.space { width: 180px; }
+
+/* MACHINE BOTTOM DETAILS */
+.machine-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.8rem;
+  padding: 0 0.4rem;
+}
+.ribbon-btns {
+  display: flex;
+  gap: 6px;
+}
+.ribbon-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+.r-red { background: #c0392b; }
+.r-black { background: #2a1f14; }
+.brand-text {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.25);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+/* SUGGESTIONS CARD */
+.suggestions-card {
+  width: 100%;
+  max-width: 720px;
+  margin-top: 1.5rem;
+  background: var(--paper2);
+  border-radius: 6px;
+  padding: 1.2rem 1.5rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  display: none;
+  border-left: 3px solid var(--machine-body);
+}
+.sug-title {
+  font-family: 'Special Elite', cursive;
+  font-size: 0.9rem;
+  color: var(--ink2);
+  letter-spacing: 2px;
+  margin-bottom: 0.8rem;
+  text-transform: uppercase;
+}
+.sug-item {
+  font-size: 0.8rem;
+  color: var(--ink2);
+  padding: 0.3rem 0;
+  border-bottom: 1px dashed var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  line-height: 1.5;
+}
+.sug-item:last-child { border-bottom: none; }
+.sug-item::before { content: '→'; color: var(--machine-body); flex-shrink: 0; }
+
+/* FOOTER */
+footer {
+  margin-top: 2.5rem;
+  text-align: center;
+  font-family: 'Special Elite', cursive;
+  font-size: 0.82rem;
+  color: var(--ink3);
+  letter-spacing: 2px;
+}
+.heart { color: var(--red-ribbon); display: inline-block; animation: hb 1.2s ease-in-out infinite; }
+@keyframes hb { 0%,100%{transform:scale(1)} 50%{transform:scale(1.25)} }
+
+/* CLICK RIPPLE */
+.key-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.35);
+  animation: ripple 0.3s ease-out forwards;
+  pointer-events: none;
+  width: 30px; height: 30px;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%) scale(0);
+}
+@keyframes ripple { to { transform: translate(-50%,-50%) scale(2.5); opacity: 0; } }
+
+@media (max-width: 600px) {
+  .machine { padding: 1rem 0.8rem 1.2rem; }
+  .key { width: 28px; height: 30px; font-size: 0.62rem; }
+  .key.wide { width: 42px; }
+  .key.wider { width: 58px; }
+  .key.space { width: 130px; }
+  .checks-paper { grid-template-columns: 1fr; }
+  .main-title { font-size: 1.8rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="title-area">
+  <div class="main-title">PASSTYPE</div>
+  <div class="main-sub">Password Strength Checker</div>
+</div>
+
+<!-- HIDDEN REAL INPUT -->
+<input class="real-input" id="real-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+<!-- TYPEWRITER MACHINE -->
+<div class="machine" id="machine" onclick="focusInput()">
+
+  <!-- ROLLER -->
+  <div class="roller-area">
+    <div class="roller-knob"></div>
+    <div class="roller-bar"><div class="paper-strip"></div></div>
+    <div class="roller-knob"></div>
+  </div>
+
+  <!-- PAPER -->
+  <div class="paper-wrap">
+    <div class="paper-header">PASSWORD ANALYSIS — TYPE TO BEGIN</div>
+
+    <div class="typed-line" id="typed-line">
+      <span class="cursor-blink" id="cursor"></span>
+    </div>
+
+    <div class="paper-footer">
+      <span class="char-count" id="char-count">0 characters</span>
+      <button class="toggle-vis" id="toggle-vis" onclick="toggleMask(event)">SHOW / HIDE</button>
+    </div>
+
+    <!-- STRENGTH ON PAPER -->
+    <div class="strength-area" id="strength-area">
+      <div class="strength-row">
+        <span class="strength-lbl">STRENGTH:</span>
+        <div class="strength-dots" id="strength-dots">
+          <div class="dot" id="d1"></div>
+          <div class="dot" id="d2"></div>
+          <div class="dot" id="d3"></div>
+          <div class="dot" id="d4"></div>
+          <div class="dot" id="d5"></div>
+        </div>
+        <span class="strength-word" id="strength-word"></span>
+      </div>
+      <div class="checks-paper" id="checks-paper"></div>
+    </div>
+  </div>
+
+  <!-- KEYBOARD -->
+  <div class="keyboard">
+    <div class="key-row">
+      <div class="key" data-char="`">~`</div>
+      <div class="key" data-char="1">1</div>
+      <div class="key" data-char="2">2</div>
+      <div class="key" data-char="3">3</div>
+      <div class="key" data-char="4">4</div>
+      <div class="key" data-char="5">5</div>
+      <div class="key" data-char="6">6</div>
+      <div class="key" data-char="7">7</div>
+      <div class="key" data-char="8">8</div>
+      <div class="key" data-char="9">9</div>
+      <div class="key" data-char="0">0</div>
+      <div class="key" data-char="-">-</div>
+      <div class="key" data-char="=">=</div>
+      <div class="key wide" data-char="BACK">DEL</div>
+    </div>
+    <div class="key-row">
+      <div class="key wide" data-char="TAB">TAB</div>
+      <div class="key" data-char="q">Q</div>
+      <div class="key" data-char="w">W</div>
+      <div class="key" data-char="e">E</div>
+      <div class="key" data-char="r">R</div>
+      <div class="key" data-char="t">T</div>
+      <div class="key" data-char="y">Y</div>
+      <div class="key" data-char="u">U</div>
+      <div class="key" data-char="i">I</div>
+      <div class="key" data-char="o">O</div>
+      <div class="key" data-char="p">P</div>
+      <div class="key" data-char="[">[</div>
+      <div class="key" data-char="]">]</div>
+      <div class="key" data-char="\\">\\</div>
+    </div>
+    <div class="key-row">
+      <div class="key wider" data-char="CAPS">CAPS</div>
+      <div class="key" data-char="a">A</div>
+      <div class="key" data-char="s">S</div>
+      <div class="key" data-char="d">D</div>
+      <div class="key" data-char="f">F</div>
+      <div class="key" data-char="g">G</div>
+      <div class="key" data-char="h">H</div>
+      <div class="key" data-char="j">J</div>
+      <div class="key" data-char="k">K</div>
+      <div class="key" data-char="l">L</div>
+      <div class="key" data-char=";">;</div>
+      <div class="key" data-char="'">'</div>
+      <div class="key wider" data-char="ENTER">RETURN</div>
+    </div>
+    <div class="key-row">
+      <div class="key wider" data-char="SHIFT">SHIFT</div>
+      <div class="key" data-char="z">Z</div>
+      <div class="key" data-char="x">X</div>
+      <div class="key" data-char="c">C</div>
+      <div class="key" data-char="v">V</div>
+      <div class="key" data-char="b">B</div>
+      <div class="key" data-char="n">N</div>
+      <div class="key" data-char="m">M</div>
+      <div class="key" data-char=",">,</div>
+      <div class="key" data-char=".">.</div>
+      <div class="key" data-char="/">/</div>
+      <div class="key wider" data-char="SHIFT">SHIFT</div>
+    </div>
+    <div class="key-row">
+      <div class="key space" data-char=" ">SPACE</div>
+    </div>
+  </div>
+
+  <div class="machine-bottom">
+    <div class="ribbon-btns">
+      <div class="ribbon-dot r-red"></div>
+      <div class="ribbon-dot r-black"></div>
+    </div>
+    <div class="brand-text">PassType Mk.II</div>
+    <div class="ribbon-btns">
+      <div class="ribbon-dot r-black"></div>
+      <div class="ribbon-dot r-red"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SUGGESTIONS CARD -->
+<div class="suggestions-card" id="suggestions-card">
+  <div class="sug-title">Recommendations</div>
+  <div id="suggestions-list"></div>
+</div>
+
+<footer>
+  Made with <span class="heart">♥</span> by <span style="color:var(--ink2)">Devansh Gupta</span>
+</footer>
+
+<script>
+const realInput = document.getElementById('real-input');
+const typedLine = document.getElementById('typed-line');
+const cursor    = document.getElementById('cursor');
+const charCount = document.getElementById('char-count');
+
+let password = '';
+let masked = true;
+let capsOn = false;
+
+// AudioContext for click sound
+let audioCtx = null;
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function playClick(type = 'key') {
+  try {
+    const ctx = getAudio();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    if (type === 'back') {
+      osc.frequency.setValueAtTime(180, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.18, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+    } else {
+      osc.frequency.setValueAtTime(400 + Math.random()*200, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.06);
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+    }
+    osc.type = 'square';
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.12);
+  } catch(e) {}
+}
+
+function focusInput() { realInput.focus(); }
+
+function renderPassword() {
+  typedLine.innerHTML = '';
+  const display = masked
+    ? password.replace(/./g, '•')
+    : password;
+  for (const ch of display) {
+    const span = document.createElement('span');
+    span.className = 'typed-char';
+    span.textContent = ch;
+    typedLine.appendChild(span);
+  }
+  typedLine.appendChild(cursor);
+  charCount.textContent = password.length + ' character' + (password.length !== 1 ? 's' : '');
+  analyze();
+}
+
+function toggleMask(e) {
+  e.stopPropagation();
+  masked = !masked;
+  renderPassword();
+}
+
+// Flash a physical key
+function flashKey(char) {
+  const keys = document.querySelectorAll('.key');
+  keys.forEach(k => {
+    const kc = k.getAttribute('data-char');
+    if (kc && kc.toLowerCase() === char.toLowerCase()) {
+      k.classList.add('pressed');
+      const rip = document.createElement('div');
+      rip.className = 'key-ripple';
+      k.appendChild(rip);
+      setTimeout(() => { k.classList.remove('pressed'); rip.remove(); }, 120);
+    }
+  });
+}
+
+// Keyboard input
+realInput.addEventListener('keydown', e => {
+  if (e.key === 'Backspace') {
+    password = password.slice(0, -1);
+    playClick('back');
+    flashKey('BACK');
+    renderPassword();
+  } else if (e.key === 'CapsLock') {
+    capsOn = !capsOn;
+    flashKey('CAPS');
+  } else if (e.key === 'Enter') {
+    flashKey('ENTER');
+    playClick();
+  } else if (e.key === 'Tab') {
+    e.preventDefault();
+    flashKey('TAB');
+  } else if (e.key === 'Shift') {
+    flashKey('SHIFT');
+  } else if (e.key.length === 1) {
+    password += e.key;
+    playClick();
+    flashKey(e.key);
+    renderPassword();
+  }
+  e.preventDefault();
+});
+
+// Click on visual keys
+document.querySelectorAll('.key').forEach(key => {
+  key.addEventListener('mousedown', e => {
+    e.stopPropagation();
+    const ch = key.getAttribute('data-char');
+    if (!ch) return;
+    if (ch === 'BACK') {
+      password = password.slice(0, -1);
+      playClick('back');
+    } else if (ch === 'CAPS' || ch === 'SHIFT' || ch === 'TAB' || ch === 'ENTER') {
+      playClick();
+    } else {
+      password += ch;
+      playClick();
+    }
+    renderPassword();
+    realInput.focus();
+  });
+});
+
+// ANALYSIS
+const checks = [
+  { label: 'Min 8 chars',       test: p => p.length >= 8 },
+  { label: 'Uppercase A-Z',     test: p => /[A-Z]/.test(p) },
+  { label: 'Lowercase a-z',     test: p => /[a-z]/.test(p) },
+  { label: 'Number 0-9',        test: p => /[0-9]/.test(p) },
+  { label: 'Special !@#$…',     test: p => /[^a-zA-Z0-9]/.test(p) },
+  { label: '12+ chars (bonus)', test: p => p.length >= 12 },
+];
+
+function analyze() {
+  const sa = document.getElementById('strength-area');
+  const sc = document.getElementById('suggestions-card');
+
+  if (!password) {
+    sa.style.display = 'none';
+    sc.style.display = 'none';
+    return;
+  }
+  sa.style.display = 'block';
+
+  const results = checks.map(c => ({ ...c, pass: c.test(password) }));
+  const score   = results.filter(r => r.pass).length;
+
+  // Dots
+  let level, color, dotClass, filled;
+  if      (score <= 1) { level='CRITICAL';   dotClass='filled-weak';   filled=1; color='#c0392b'; }
+  else if (score === 2){ level='WEAK';        dotClass='filled-weak';   filled=2; color='#c0392b'; }
+  else if (score === 3){ level='MODERATE';    dotClass='filled-mid';    filled=3; color='#d4820a'; }
+  else if (score === 4){ level='STRONG';      dotClass='filled-good';   filled=4; color='#1a7a4a'; }
+  else                 { level='VERY STRONG'; dotClass='filled-strong'; filled=5; color='#1a7a4a'; }
+
+  for (let i = 1; i <= 5; i++) {
+    const d = document.getElementById('d'+i);
+    d.className = 'dot' + (i <= filled ? ' '+dotClass : '');
+  }
+  const sw = document.getElementById('strength-word');
+  sw.textContent = level;
+  sw.style.color = color;
+
+  // Checks
+  document.getElementById('checks-paper').innerHTML = results.map(r => `
+    <div class="chk ${r.pass ? 'pass' : 'fail'}">
+      <span class="chk-sym">${r.pass ? '✓' : '○'}</span>
+      <span>${r.label}</span>
+    </div>
+  `).join('');
+
+  // Suggestions
+  const tips = [];
+  if (password.length < 8)          tips.push('Use at least 8 characters.');
+  if (password.length < 12)         tips.push('Increase to 12+ characters for better security.');
+  if (!/[A-Z]/.test(password))      tips.push('Add uppercase letters (A–Z).');
+  if (!/[a-z]/.test(password))      tips.push('Add lowercase letters (a–z).');
+  if (!/[0-9]/.test(password))      tips.push('Include at least one number.');
+  if (!/[^a-zA-Z0-9]/.test(password)) tips.push('Add special characters like !@#$%^&*');
+  if (/(.)\1{2,}/.test(password))   tips.push('Avoid repeating characters (e.g. "aaa").');
+
+  if (tips.length > 0) {
+    sc.style.display = 'block';
+    document.getElementById('suggestions-list').innerHTML =
+      tips.map(t => `<div class="sug-item">${t}</div>`).join('');
+  } else {
+    sc.style.display = 'block';
+    document.getElementById('suggestions-list').innerHTML =
+      `<div class="sug-item" style="color:#1a7a4a">All checks passed — this is a strong password!</div>`;
+  }
+}
+
+// Auto focus
+window.addEventListener('load', () => { focusInput(); });
+document.getElementById('machine').addEventListener('click', focusInput);
+</script>
+</body>
+</html>
